@@ -5,6 +5,7 @@ import platform
 import os
 import json
 from datetime import datetime
+from core_api.communication import report_to_core
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'camelgate_config.json')
 LOG_FILE = os.path.join(os.path.dirname(__file__), 'camelgate_alerts.log')
@@ -32,6 +33,24 @@ def load_config():
 
 def log_alert(message):
     timestamp = datetime.now().isoformat()
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+
+    payload = {
+        "agent_id": "CamelGate-001",
+        "timestamp": timestamp,
+        "hostname": hostname,
+        "device_ip": ip_address,
+        "threat_type": "High Outbound Traffic",
+        "details": message,
+        "status": "pending",
+        "score": 4
+    }
+
+    # Send payload to core
+    report_to_core(payload)
+
+    # Also log locally
     with open(LOG_FILE, 'a') as f:
         f.write(f"{timestamp} [CamelGate ALERT] {message}\n")
     print(f"[CamelGate] {message}")
@@ -75,7 +94,7 @@ def monitor_outbound():
                             if bytes_sent > threshold:
                                 log_alert(f"High outbound traffic! PID={local_pid}, EXE={proc_name}, SENT={bytes_sent/1024/1024:.2f} MB, Destination={remote_ip}, Class={proc_class}")
 
-                        except Exception as e:
+                        except Exception:
                             continue
 
         except Exception as scan_error:

@@ -4,6 +4,8 @@ import json
 import time
 import platform
 from datetime import datetime
+from core_api.communication import report_to_core
+import socket
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'recluse_config.json')
 LOG_FILE = os.path.join(os.path.dirname(__file__), 'recluse_alerts.log')
@@ -27,6 +29,24 @@ def load_config():
 
 def log_alert(message):
     timestamp = datetime.now().isoformat()
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+
+    payload = {
+        "agent_id": "Recluse-001",
+        "timestamp": timestamp,
+        "hostname": hostname,
+        "device_ip": ip_address,
+        "threat_type": "Active Threat Neutralized",
+        "details": message,
+        "status": "confirmed",  # Recluse actively kills threats
+        "score": 5
+    }
+
+    # Report to Core
+    report_to_core(payload)
+
+    # Local fallback logging
     with open(LOG_FILE, 'a') as f:
         f.write(f"{timestamp} [Recluse ACTION] {message}\n")
     print(f"[Recluse] {message}")

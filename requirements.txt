@@ -1,0 +1,100 @@
+import requests
+import logging
+
+# === Configuration ===
+CORE_API_URL = 'https://arachnocore.common-joe.com/api/report'
+API_KEY = 'YOUR_SECURE_API_KEY'
+
+# Client-side certificate and private key for mutual TLS (mTLS)
+CLIENT_CERT = ('certs/client_cert.pem', 'certs/client_key.pem')
+# Server CA certificate to verify Arachnocore's identity
+SERVER_CA_CERT = 'certs/core_ca_cert.pem'
+
+# Setup Logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+
+
+def report_to_core(payload):
+    """
+    Sends a payload securely to Arachnocore using mutual TLS authentication.
+
+    :param payload: Dict containing threat intelligence data
+    :return: Boolean indicating success or failure
+    """
+    headers = {
+        'Authorization': f'Bearer {API_KEY}',
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        response = requests.post(
+            CORE_API_URL,
+            json=payload,
+            headers=headers,
+            cert=CLIENT_CERT,
+            verify=SERVER_CA_CERT
+        )
+        response.raise_for_status()
+        logging.info(f"Payload successfully reported: {response.status_code}")
+        return True
+    except requests.exceptions.HTTPError as http_err:
+        logging.error(f"HTTP error occurred: {http_err} - Response: {getattr(http_err.response, 'text', '')}")
+    except requests.exceptions.ConnectionError as conn_err:
+        logging.error(f"Connection error occurred: {conn_err}")
+    except requests.exceptions.Timeout as timeout_err:
+        logging.error(f"Timeout error occurred: {timeout_err}")
+    except requests.exceptions.RequestException as req_err:
+        logging.error(f"Request exception occurred: {req_err}")
+
+    return False
+
+
+def check_in(agent_id):
+    """
+    Agents poll the core server to receive pending commands.
+
+    :param agent_id: Unique ID of the agent
+    :return: List of commands (if any)
+    """
+    check_in_url = f'https://arachnocore.common-joe.com/api/check_in/{agent_id}'
+    headers = {
+        'Authorization': f'Bearer {API_KEY}'
+    }
+
+    try:
+        response = requests.get(
+            check_in_url,
+            headers=headers,
+            cert=CLIENT_CERT,
+            verify=SERVER_CA_CERT
+        )
+        response.raise_for_status()
+        commands = response.json().get('commands', [])
+        logging.info(f"Received {len(commands)} command(s) from core.")
+        return commands
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Agent check-in failed: {e}")
+        return []
+
+
+# Example usage (comment out or remove in production)
+if __name__ == '__main__':
+    example_payload = {
+        "agent_id": "CamelGate-001",
+        "timestamp": "2025-04-27T10:35:21Z",
+        "hostname": "client-hostname",
+        "device_ip": "192.168.1.20",
+        "threat_type": "Suspicious Process",
+        "details": "Detected suspicious process: hydra.exe",
+        "status": "pending",
+        "score": 4
+    }
+
+    if report_to_core(example_payload):
+        print("Example payload sent successfully.")
+
+    commands = check_in("CamelGate-001")
+    if commands:
+        print("Commands received:", commands)
+    else:
+        print("No commands received.")
