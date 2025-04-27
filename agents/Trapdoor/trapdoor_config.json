@@ -1,0 +1,7 @@
+{
+    "check_registry": true,
+    "check_scheduled_tasks": true,
+    "check_crontab": true,
+    "check_systemd": true,
+    "scan_interval": 600
+}

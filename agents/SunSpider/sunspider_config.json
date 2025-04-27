@@ -1,0 +1,5 @@
+{
+    "enable_ip_lookup": true,
+    "enable_dns_lookup": true,
+    "scan_interval": 3600
+}

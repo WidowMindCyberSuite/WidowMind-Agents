@@ -1,0 +1,15 @@
+{
+    "suspicious_processes": [
+        "mimikatz.exe",
+        "meterpreter.exe",
+        "nc.exe",
+        "powershell.exe",
+        "netcat",
+        "nmap"
+    ],
+    "critical_paths": [
+        "C:/Windows/System32/",
+        "/etc/"
+    ],
+    "scan_interval": 300
+}

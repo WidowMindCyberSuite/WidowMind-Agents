@@ -1,0 +1,10 @@
+{
+    "kill_targets": [
+        "mimikatz.exe",
+        "meterpreter.exe",
+        "nc.exe",
+        "netcat",
+        "malware_sample.exe"
+    ],
+    "scan_interval": 5
+}

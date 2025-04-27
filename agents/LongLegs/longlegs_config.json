@@ -1,0 +1,4 @@
+{
+    "suspicious_ports": [ 4444, 1337, 3389, 23 ],
+    "scan_interval": 300
+}

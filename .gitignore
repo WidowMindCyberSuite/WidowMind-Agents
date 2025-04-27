@@ -1,0 +1,35 @@
+# Ignore Visual Studio folder
+.vs/
+
+# Ignore Python __pycache__ folders
+__pycache__/
+
+# Ignore Python compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment folders
+env/
+venv/
+ENV/
+VENV/
+.venv/
+
+# Ignore log files
+*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Optional: Ignore IDE/editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignore compiled binaries or temp builds
+build/
+dist/
+*.egg-info/
